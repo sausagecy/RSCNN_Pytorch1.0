@@ -10,7 +10,7 @@ __Relation-Shape Convolutional Neural Network for Point Cloud Analysis__ [[arXiv
 
 ## Citation
 
-If our paper is helpful for your research, please consider citing:   
+If Liu's paper is helpful for your research, please consider citing:   
 ```BibTex
         @inproceedings{liu2019rscnn,   
             author = {Yongcheng Liu and    
@@ -25,21 +25,18 @@ If our paper is helpful for your research, please consider citing:
 ```
 ## Usage: Preparation
 
+## Note
+This repository is reproduction of RSCNN based on Pytorch version 1.0 or 1.1, borrowed from Liu's code (https://yochengliu.github.io/Relation-Shape-CNN/)
+
 ### Requirement
 
-- Ubuntu 14.04
+- Ubuntu 16.04
 - Python 3 (recommend Anaconda3)
 - Pytorch 1.0 or 1.1
 - CMake > 2.8
-- CUDA 8.0 + cuDNN 5.1
+- CUDA 9.0 + cuDNN 7.6(recommend conda install cudnn==7.6.0/ conda install cudatoolkit==9.0)
 
-### Building Kernel
 
-    git clone https://github.com/Yochengliu/Relation-Shape-CNN.git 
-    cd Relation-Shape-CNN
-
-- mkdir build && cd build
-- cmake .. && make
 
 ### Dataset
 __Shape Classification__
