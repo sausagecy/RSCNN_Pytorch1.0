@@ -40,13 +40,12 @@ This repository is reproduction of RSCNN based on Pytorch version 1.0 or 1.1, bo
 Setup
 -----
 The custom ops used by Pointnet++ are currently **ONLY** supported on the GPU using CUDA.
-* Building `_ext` module
+* Building `_ext` module (build and copy a .so file to utils/)
 
-  ::
+    ::
 
-    python setup.py build_ext --inplace
+        python setup.py build_ext --inplace
 
-    (build and copy a .so file to utils/)
 
 
 ### Dataset
