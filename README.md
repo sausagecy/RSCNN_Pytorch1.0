@@ -31,11 +31,22 @@ This repository is reproduction of RSCNN based on Pytorch version 1.0 or 1.1, bo
 ### Requirement
 
 - Ubuntu 16.04
-- Python 3 (recommend Anaconda3)
-- Pytorch 1.0 or 1.1
+- Python 3.6 (recommend Anaconda3)
+- Pytorch 1.0+ (test on 1.0, 1.1 and 1.2)
 - CMake > 2.8
-- CUDA 9.0 + cuDNN 7.6(recommend conda install cudnn==7.6.0/ conda install cudatoolkit==9.0)
+- CUDA 10.2 + cuDNN 7.6
+- GNU <= 7.5
 
+Setup
+-----
+The custom ops used by Pointnet++ are currently **ONLY** supported on the GPU using CUDA.
+* Building `_ext` module
+
+  ::
+
+    python setup.py build_ext --inplace
+
+    (build and copy a .so file to utils/)
 
 
 ### Dataset
