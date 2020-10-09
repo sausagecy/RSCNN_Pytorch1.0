@@ -98,12 +98,9 @@ class RSCNN_SSN(nn.Module):
 
 
 if __name__ == "__main__":
-    sim_data = torch.rand(16, 1024, 6)
-    #sim_data = sim_data.cuda()
+    sim_data = torch.rand(16, 1024, 6).cuda()
     labels = torch.randint(high=6, size=(16,))
-    #sim_cls = sim_cls.cuda()
 
-    model = RSCNN_SSN(num_classes=6, input_channels=3, use_xyz=True)
-    #seg = seg.cuda()
+    model = RSCNN_SSN(num_classes=8, input_channels=3, use_xyz=True).cuda()
     out = model(sim_data)
-    #print('cls', out.size())
+    print('cls', out.size())
