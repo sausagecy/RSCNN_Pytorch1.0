@@ -419,7 +419,7 @@ class QueryAndGroup(nn.Module):
         idx = point_utils.query_ball_point(self.radius, self.nsample, xyz_flipped, new_xyz_flipped)
         grouped_xyz = point_utils.index_points(xyz_flipped, idx) # (B, 3, npoint, nsample)"""
         raw_grouped_xyz = grouped_xyz
-        grouped_xyz -= new_xyz.transpose(1,2).unsqueeze(-1)
+        grouped_xyz = grouped_xyz - new_xyz.transpose(1,2).unsqueeze(-1)
 
         if features is not None:
             grouped_features = grouping_operation(features, idx)
