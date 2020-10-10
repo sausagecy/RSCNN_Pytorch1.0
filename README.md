@@ -42,9 +42,9 @@ Setup
 The custom ops used by Pointnet++ are currently **ONLY** supported on the GPU using CUDA.
 * Building `_ext` module (build and copy a .so file to utils/)
 
-    ::
+  ::
 
-        python setup.py build_ext --inplace
+    python setup.py build_ext --inplace
 
 
 
@@ -93,4 +93,4 @@ The code is heavily borrowed from [Pointnet2_PyTorch](https://github.com/erikwij
         
 ## Contact
 
-If you have some ideas or questions about our research to share with us, please contact <yongcheng.liu@nlpr.ia.ac.cn>
+If you have some ideas or questions about the code, please contact <changyuan999@foxmail.com>
