@@ -73,7 +73,14 @@ def main():
     )
     
     model = RSCNN_SSN(num_classes = args.num_classes, input_channels = args.input_channels, relation_prior = args.relation_prior, use_xyz = True)
-    model.cuda()
+    # for multi GPU
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available() and torch.cuda.device_count()>=2:
+        model = nn.DataParallel(model, device_ids=[0, 1])
+        model.to(device)
+    elif  torch.cuda.is_available() and torch.cuda.device_count()==1:
+        model.cuda()
+
     optimizer = optim.Adam(
         model.parameters(), lr=args.base_lr, weight_decay=args.weight_decay)
 
