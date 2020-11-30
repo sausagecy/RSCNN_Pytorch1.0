@@ -9,9 +9,9 @@ common:
     lr_clip: 0.00001
     lr_decay: 0.7
     decay_step: 21
-    epochs: 120
+    epochs: 200
 
-    weight_decay: 0.00001
+    weight_decay: 0
     bn_momentum: 0.9
     bnm_clip: 0.01
     bn_decay: 0.5
@@ -29,4 +29,4 @@ common:
     
     checkpoint: ''        # the model to start from
     save_path: cls
-    data_root: /home/cv_jcy/Pytorch_Workspace/Pointnet2_PyTorch/pointnet2/data/ #$data_root$
+    data_root: $data_root$

@@ -39,6 +39,10 @@ This repository is reproduction of RSCNN based on Pytorch version 1.0 or 1.1, bo
 
 Setup
 -----
+* You may install etw_pytorch_utils for next step:
+    ::
+        pip install git+git://github.com/erikwijmans/etw_pytorch_utils.git@v1.1.1#egg=etw_pytorch_utils
+
 The custom ops used by Pointnet++ are currently **ONLY** supported on the GPU using CUDA.
 * Building `_ext` module (build and copy a .so file to utils/)
 
