@@ -49,13 +49,11 @@ class ModelNet40Cls(data.Dataset):
         point_list, label_list = [], []
         for f in self.files:
             points, labels = _load_data_file(os.path.join(root, f))
-            points = pc_normalize(points)
             point_list.append(points)
             label_list.append(labels)
 
         self.points = np.concatenate(point_list, 0)
         self.labels = np.concatenate(label_list, 0)
-        print(np.max(self.labels))
 
     def __getitem__(self, idx):
         pt_idxs = np.arange(0, self.points.shape[1])   # 2048
