@@ -7,7 +7,7 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.dirname(BASE_DIR))
 
 import utils.pointnet2_utils as pointnet2_utils
-#import my_point_utils as point_utils
+import my_point_utils as point_utils
 import pytorch_utils as pt_utils
 from typing import List
 import numpy as np
@@ -43,11 +43,12 @@ class _PointnetSAModuleBase(nn.Module):
         new_features_list = []
         xyz_flipped = xyz.transpose(1, 2).contiguous()
         if self.npoint is not None:
-            #fps_idx = point_utils.farthest_point_sampling(xyz_flipped, self.npoint)  # (B, npoint)
-            fps_idx = pointnet2_utils.furthest_point_sample(xyz_flipped, self.npoint)
+            # fps_idx = point_utils.farthest_point_sampling(xyz_flipped, self.npoint)  # (B, npoint)
+            fps_idx = pointnet2_utils.furthest_point_sample(xyz, self.npoint)
             new_xyz = pointnet2_utils.gather_operation(xyz_flipped, fps_idx).transpose(1, 2).contiguous()
-            #new_xyz = point_utils.index_points(xyz_flipped, fps_idx).transpose(1, 2).contiguous()
-            #fps_idx = fps_idx.data
+            # new_xyz = point_utils.index_points(xyz_flipped, fps_idx).transpose(1, 2).contiguous()
+            # fps_idx = fps_idx.type(torch.cuda.IntTensor)
+            # fps_idx = fps_idx.data
         else:
             new_xyz = None
             fps_idx = None
