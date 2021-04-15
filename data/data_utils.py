@@ -41,6 +41,7 @@ class PointcloudRotatebyAngle(object):
         self.rotation_angle = rotation_angle
     # default operation: rotating pc around Y axis
     def __call__(self, pc):
+        device = pc.device
         normals = pc.size(2) > 3
         bsize = pc.size()[0]
         for i in range(bsize):
@@ -49,7 +50,7 @@ class PointcloudRotatebyAngle(object):
             rotation_matrix = np.array([[cosval, 0, sinval],
                                         [0, 1, 0],
                                         [-sinval, 0, cosval]])
-            rotation_matrix = torch.from_numpy(rotation_matrix).float().cuda()
+            rotation_matrix = torch.from_numpy(rotation_matrix).float().to(device)
             
             cur_pc = pc[i, :, :]
             if not normals:
@@ -87,13 +88,14 @@ class PointcloudScaleAndTranslate(object):
         self.translate_range = translate_range
 
     def __call__(self, pc):
-        #bsize = pc.size()[0]
-        #for i in range(bsize):
-        xyz1 = np.random.uniform(low=self.scale_low, high=self.scale_high, size=[3])
-        xyz2 = np.random.uniform(low=-self.translate_range, high=self.translate_range, size=[3])
+        device = pc.device
+        # bsize = pc.size()[0]
+        # for i in range(bsize):
+        xyz1 = torch.zeros(3).uniform_(self.scale_low, self.scale_high)
+        xyz2 = torch.zeros(3).uniform_(-self.translate_range, self.translate_range)
             
-            #pc[i, :, 0:3] = torch.mul(pc[i, :, 0:3], torch.from_numpy(xyz1).float().cuda()) + torch.from_numpy(xyz2).float().cuda()
-        pc[:, 0:3] = torch.mul(pc[:, 0:3], torch.from_numpy(xyz1).float()) + torch.from_numpy(xyz2).float()
+            # pc[i, :, 0:3] = torch.mul(pc[i, :, 0:3], xyz1.to(device)) + xyz2.to(device)
+        pc[:, 0:3] = torch.mul(pc[:, 0:3], xyz1.float().to(device)) + xyz2.float().to(device)
         return pc
         
 class PointcloudScale(object):
@@ -103,10 +105,11 @@ class PointcloudScale(object):
 
     def __call__(self, pc):
         bsize = pc.size()[0]
+        device = pc.device
         for i in range(bsize):
-            xyz1 = np.random.uniform(low=self.scale_low, high=self.scale_high, size=[3])
+            xyz1 = torch.zeros(3).uniform_(self.scale_low, self.scale_high)
             
-            pc[i, :, 0:3] = torch.mul(pc[i, :, 0:3], torch.from_numpy(xyz1).float().cuda())
+            pc[i, :, 0:3] = torch.mul(pc[i, :, 0:3], torch.from_numpy(xyz1).float().to(device))
             
         return pc
         
@@ -116,10 +119,11 @@ class PointcloudTranslate(object):
 
     def __call__(self, pc):
         bsize = pc.size()[0]
+        device = pc.device
         for i in range(bsize):
             xyz2 = np.random.uniform(low=-self.translate_range, high=self.translate_range, size=[3])
             
-            pc[i, :, 0:3] = pc[i, :, 0:3] + torch.from_numpy(xyz2).float().cuda()
+            pc[i, :, 0:3] = pc[i, :, 0:3] + torch.from_numpy(xyz2).float().to(device)
             
         return pc
 
@@ -129,21 +133,21 @@ class PointcloudRandomInputDropout(object):
         self.max_dropout_ratio = max_dropout_ratio
 
     def __call__(self, pc):
-        """bsize = pc.size()[0]
-        for i in range(bsize):
-            dropout_ratio = np.random.random() * self.max_dropout_ratio  # 0~0.875
-            drop_idx = np.where(np.random.random((pc.size()[1])) <= dropout_ratio)[0]
-            if len(drop_idx) > 0:
-                cur_pc = pc[i, :, :]
-                cur_pc[drop_idx.tolist(), 0:3] = cur_pc[0, 0:3].repeat(len(drop_idx), 1)  # set to the first point
-                pc[i, :, :] = cur_pc
-        """
+        # bsize = pc.size()[0]
+        # for i in range(bsize):
+        #     dropout_ratio = np.random.random() * self.max_dropout_ratio  # 0~0.875
+        #     drop_idx = np.where(np.random.random((pc.size()[1])) <= dropout_ratio)[0]
+        #     if len(drop_idx) > 0:
+        #         cur_pc = pc[i, :, :]
+        #         cur_pc[drop_idx.tolist(), 0:3] = cur_pc[0, 0:3].repeat(len(drop_idx), 1)  # set to the first point
+        #         pc[i, :, :] = cur_pc
+        
         dropout_ratio = np.random.random() * self.max_dropout_ratio
         drop_idx = np.where(np.random.random((pc.shape[0])) <= dropout_ratio)[0]
         if len(drop_idx) > 0:
             cur_pc = pc[:,:]
             cur_pc[drop_idx.tolist(), 0:3] = cur_pc[0, 0:3].repeat(len(drop_idx), 1) # set to the first point
             pc[:,:] = cur_pc
-            del cur_pc
+            # del cur_pc
         
         return pc

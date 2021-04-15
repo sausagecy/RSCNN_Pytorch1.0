@@ -42,11 +42,6 @@ class RSConv(nn.Module):
         self.cr_mapping = mapping[2]
         if first_layer:
             self.xyz_raising = mapping[3]
-        """# my code:
-        self.mlp_for_att = nn.Conv1d(C_in, C_in, kernel_size=1, stride = 1, bias = False)
-        nn.init.kaiming_normal_(self.mlp_for_att)
-        self.softmax_att = nn.Softmax(dim=2)
-        """
         
     def forward(self, input): # input: (B, 3 + 3 + C_in, npoint, centroid + nsample)
                               # input is defined in class QueryAndGroup(nn.Module)
@@ -73,18 +68,10 @@ class RSConv(nn.Module):
         
         if self.first_layer:
             x = self.activation(self.bn_xyz_raising(self.xyz_raising(x)))
-            #print("In pytorch_utils x first layer {}".format(torch.sum(torch.isnan(x))))
+
         x = F.max_pool2d(self.activation(self.bn_rsconv(torch.mul(h_xi_xj, x))), kernel_size = (1, nsample)).squeeze(3)   # (B, C_in, npoint)
-        # Attentive pooling 
-        """relation_x = self.activation(self.bn_rsconv(torch.mul(h_xi_xj, x)))
-        relation_x = relation_x.permute(0,2,3,1) # change to (B,np,nsample,C)
-        att_score = self.softmax_att(self.mlp_for_att(relation_x))
-        x = torch.mul(relation_x, att_score)
-        x = torch.sum(x.permute, dim=2, keepdim=True)
-        x = x.permute(0,3,1,2).squeeze(3)"""
-        #del h_xi_xj
+
         x = self.activation(self.bn_channel_raising(self.cr_mapping(x)))
-        #print("In pytorch_utils x after raising {}".format(torch.sum(torch.isnan(x))))
         
         return x
         
