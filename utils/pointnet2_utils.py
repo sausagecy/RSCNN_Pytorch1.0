@@ -6,7 +6,7 @@ import torch.nn as nn
 from linalg_utils import pdist2, PDist2Order
 from collections import namedtuple
 import pytorch_utils as pt_utils
-#import my_point_utils as point_utils
+import my_point_utils as point_utils
 from typing import List, Tuple
 
 #from _ext import pointnet2
@@ -70,7 +70,9 @@ class FurthestPointSampling(Function):
             B, N, npoint, xyz, temp, output
         )
         return output"""
-        return _ext.furthest_point_sampling(xyz, npoint)
+        out = _ext.furthest_point_sampling(xyz, npoint)
+        ctx.mark_non_differentiable(out)
+        return out
 
     @staticmethod
     def backward(xyz, a=None):
@@ -169,8 +171,11 @@ class ThreeNN(Function):
         pointnet2.three_nn_wrapper(B, N, m, unknown, known, dist2, idx)
         """
         dist2, idx = _ext.three_nn(unknown, known)
+        dist = torch.sqrt(dist2)
 
-        return torch.sqrt(dist2), idx
+        ctx.mark_non_differentiable(dist, idx)
+
+        return dist, idx
 
     @staticmethod
     def backward(ctx, a=None, b=None):
@@ -251,7 +256,7 @@ class ThreeInterpolate(Function):
             grad_out.contiguous(), idx, weight, m
         )
 
-        return grad_features, None, None
+        return grad_features, None, None #torch.zeros_like(idx), torch.zeros_like(weight)
 
 
 three_interpolate = ThreeInterpolate.apply
@@ -317,7 +322,7 @@ class GroupingOperation(Function):
         #   B, C, N, npoint, nsample, grad_out_data, idx, grad_features.data
         #)
         grad_features = _ext.group_points_grad(grad_out.contiguous(), idx, N)
-        return grad_features, None
+        return grad_features, None # torch.zeros_like(idx)
 
 
 grouping_operation = GroupingOperation.apply
@@ -360,7 +365,9 @@ class BallQuery(Function):
         )
         """
         idx = _ext.ball_query(new_xyz, xyz, radius, nsample)
-        return torch.cat([fps_idx.unsqueeze(2), idx], dim = 2)
+        ctx.mark_non_differentiable(idx)
+        # return torch.cat([fps_idx.unsqueeze(2), idx], dim = 2)
+        return idx
 
     @staticmethod
     def backward(ctx, a=None):
@@ -410,20 +417,21 @@ class QueryAndGroup(nn.Module):
         """
 
         idx = ball_query(self.radius, self.nsample, xyz, new_xyz, fps_idx)
+        idx = torch.cat([fps_idx.unsqueeze(2), idx], dim = 2)
         xyz_trans = xyz.transpose(1, 2).contiguous()
         grouped_xyz = grouping_operation(
             xyz_trans, idx
         )  # (B, 3, npoint, nsample)
-        """xyz_flipped = xyz.permute(0,2,1).contiguous()
-        new_xyz_flipped = new_xyz.permute(0,2,1).contiguous()
-        idx = point_utils.query_ball_point(self.radius, self.nsample, xyz_flipped, new_xyz_flipped)
-        grouped_xyz = point_utils.index_points(xyz_flipped, idx) # (B, 3, npoint, nsample)"""
+        # xyz_flipped = xyz.permute(0,2,1).contiguous()
+        # new_xyz_flipped = new_xyz.permute(0,2,1).contiguous()
+        # idx = point_utils.query_ball_point(self.radius, self.nsample, xyz_flipped, new_xyz_flipped)
+        # grouped_xyz = point_utils.index_points(xyz_flipped, idx) # (B, 3, npoint, nsample)
         raw_grouped_xyz = grouped_xyz
         grouped_xyz = grouped_xyz - new_xyz.transpose(1,2).unsqueeze(-1)
 
         if features is not None:
             grouped_features = grouping_operation(features, idx)
-            #grouped_features = point_utils.index_points(features, idx)
+            # grouped_features = point_utils.index_points(features, idx)
             if self.use_xyz:
                 new_features = torch.cat([raw_grouped_xyz, grouped_xyz, grouped_features],
                                          dim=1)  # (B, C + 3 + 3, npoint, nsample)
